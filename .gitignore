@@ -2,3 +2,11 @@
 ipynb_checkpoints/*
 .idea/*
 __pycache__/*
+*.cpp
+*.h
+*.c
+*.lua
+*.exe
+Box2D/*
+Box2D-master/*
+environments/*
