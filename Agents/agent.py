@@ -1,23 +1,32 @@
 import numpy as np
 import copy
-from model import Actor, Critic
-from replaybuffer import ReplayBuffer
-from keras import backend as K
-from task import Task
+from Model.model import Actor, Critic
+from Support.replaybuffer import ReplayBuffer
+#from keras import backend as K
+#from Task.SoftLanding import SoftLanding
 
 
 # Constants from paper: Lillicrap, Timothy P., et al., 2015. Continuous Control with Deep Reinforcement Learning.
-
-BUFFER_SIZE = int(1e8)  # replay buffer size
-BATCH_SIZE = 64        # minibatch size
-GAMMA = 0.99           # discount factor
-TAU = 0.01             # for soft update of target parameters
+GAMMA = 0.99            # discount factor
+TAU = 0.01              # for soft update of target parameters
 LR_ACTOR = 1e-4         # learning rate of the actor 
 LR_CRITIC = 1e-3        # learning rate of the critic
 
-EXPLORATION_MU = 0.0
-EXPLORATION_THETA = 0.15 # same direction
-EXPLORATION_SIGMA = 0.2 # random noise
+# Replay buffer parameters
+BUFFER_SIZE = int(1e4)  # replay buffer size
+BATCH_SIZE = 64         # minibatch size
+
+
+# Noise parameters
+EXPLORATION_MU_MAIN_ENGINE = 0.0
+EXPLORATION_MU_DIRECTIONAL_ENGINE = 0.0
+EXPLORATION_THETA = 0.1 # same direction
+EXPLORATION_SIGMA = 0.1 # random noise
+
+
+EPSILON = 1.0
+EPSILON_MIN = 0.001
+EPSILON_DECAY = 1e-6
 
 class DDPG():
     """Reinforcement Learning agent that learns using DDPG."""
@@ -40,13 +49,17 @@ class DDPG():
         self.critic_target.model.set_weights(self.critic_local.model.get_weights())
         self.actor_target.model.set_weights(self.actor_local.model.get_weights())
 
-        # Noise process
+        # Noise parameters
+        self.epsilon = EPSILON
         
-        #self.exploration_mu = (task.action_low + task.action_high)/2
-        self.exploration_mu = 0
+        self.exploration_mu_main_engine = EXPLORATION_MU_MAIN_ENGINE
+        self.exploration_mu_directional_engine = EXPLORATION_MU_DIRECTIONAL_ENGINE
         self.exploration_theta = EXPLORATION_THETA
         self.exploration_sigma = EXPLORATION_SIGMA
-        self.noise = OUNoise(self.action_size, self.exploration_mu, self.exploration_theta, self.exploration_sigma)
+        self.noise = OUNoise(self.action_size, 
+                             [self.exploration_mu_main_engine, self.exploration_mu_directional_engine],
+                              self.exploration_theta,
+                              self.exploration_sigma)
 
         # Replay memory
         self.buffer_size = BUFFER_SIZE
@@ -78,56 +91,64 @@ class DDPG():
         self.score = 0.0
         return state
 
-    def step(self, action, reward, next_state, done):
+    def step(self, action, reward, next_state, done, timestep):
         # Save experience / reward
         #self.memory.add(self.last_state, action, reward, next_state, done)
+        
         
         self.total_reward += reward
         self.count += 1
         
-        #action_norm = 2*(np.array(action) - self.action_low)/ (self.action_high - self.action_low) -1
+        self.score = self.total_reward 
         
+        if self.score > self.best_score:
+            self.best_score = self.score
+            
         # Save experience/reward
         self.memory.add(self.last_state, action, reward, next_state, done)
 
         # Learn if enough samples are available in memory.
         if len(self.memory) > self.batch_size:
+            #for _ in range(10):
             experiences = self.memory.sample()
             self.learn(experiences)
-            
+                
         # Roll over last state and action
         self.last_state = next_state
         
     def act(self, state):
         """Returns actions for given state(s) as per current policy."""
+        
         state = np.reshape(state, [-1, self.state_size])
+        
         action = self.actor_local.model.predict(state)[0]
-        action = action + self.noise.sample()
-        action = np.clip(action, self.action_low, self.action_high)
-        return list(action)  # add some noise for exploration
+        
+        # add some noise for exploration
+        action = action + self.epsilon * self.noise.sample()
+        
+        return action.astype(np.float32)  
     
     def learn(self, experiences):
         """Update policy and value parameters using given batch of experience tuples."""
         
-        self.score = self.total_reward #/float(self.count) if self.count else 0.0
-        
-        if self.score > self.best_score:
-            self.best_score = self.score
+
             
         # Convert experience tuples to separate arrays for each element (states, actions, rewards, etc.)
-        states = np.vstack([e.state for e in experiences if e is not None])
+        states = np.vstack([e.state for e in experiences if e is not None]).astype(np.float32).reshape(-1, self.state_size)
         actions = np.array([e.action for e in experiences if e is not None]).astype(np.float32).reshape(-1, self.action_size)
         rewards = np.array([e.reward for e in experiences if e is not None]).astype(np.float32).reshape(-1, 1)
         dones = np.array([e.done for e in experiences if e is not None]).astype(np.uint8).reshape(-1, 1)
-        next_states = np.vstack([e.next_state for e in experiences if e is not None])
+        next_states = np.vstack([e.next_state for e in experiences if e is not None]).astype(np.float32).reshape(-1, self.state_size)
 
         # Get predicted next-state actions and Q values from target models
         #     Q_targets_next = critic_target(next_state, actor_target(next_state))
+        
         actions_next = self.actor_target.model.predict_on_batch(next_states)
         Q_targets_next = self.critic_target.model.predict_on_batch([next_states, actions_next])
 
         # Compute Q targets for current states and train critic model (local)
         Q_targets = rewards + self.gamma * Q_targets_next * (1 - dones)
+
         self.critic_local.model.train_on_batch(x=[states, actions], y=Q_targets)
 
         # Train actor model (local)
@@ -138,7 +159,11 @@ class DDPG():
         self.soft_update(self.critic_local.model, self.critic_target.model)
         self.soft_update(self.actor_local.model, self.actor_target.model)   
         
-      
+        if self.epsilon - EPSILON_DECAY > EPSILON_MIN:
+            self.epsilon -= EPSILON_DECAY
+            
+            
+        self.noise.reset()
         
     def soft_update(self, local_model, target_model):
         """Soft update model parameters."""
