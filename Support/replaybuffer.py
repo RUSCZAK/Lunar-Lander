@@ -2,8 +2,8 @@ import random
 from collections import namedtuple, deque
 import itertools
 
-GOOD_MEMORY_THOLD   = 0
-BAD_MEMORY_THOLD    = -100
+GOOD_MEMORY_THOLD   = -100
+BAD_MEMORY_THOLD    = -200
 
 class ReplayBuffer:
     """Fixed-size buffer to store experience tuples."""
@@ -28,26 +28,38 @@ class ReplayBuffer:
         self.common_memory = deque(maxlen=int(partial_buffer + remainder_buffer))
         
         self.partial_batch, self.remainder_batch = divmod(self.batch_size, 3)
+        self.num_experiences = 0
         
         
     def add(self, state, action, reward, next_state, done):
         """Add a new experience to memory."""
         
         e = self.experience(state, action, reward, next_state, done)
-        self.memory.append(e)
-        if reward > GOOD_MEMORY_THOLD:
-            self.good_memory.append(e)
-        elif reward < BAD_MEMORY_THOLD:
-            self.bad_memory.append(e)
+        
+        
+        if self.num_experiences < self.buffer_size:
+            self.memory.append(e)
+            self.num_experiences += 1
         else:
-            self.common_memory.append(e)
+            print("Overwriting Memory")
+            self.memory.popleft()
+            self.memory.append(e)
+        
+        #self.memory.append(e)
+        
+        #if reward > GOOD_MEMORY_THOLD:
+        #    self.good_memory.append(e)
+        #elif reward < BAD_MEMORY_THOLD:
+        #    self.bad_memory.append(e)
+        #else:
+        #    self.common_memory.append(e)
         
 
     def sample(self):
         """Randomly sample a batch of experiences from memory."""
         
-        
-        #return random.sample(self.memory, k=batch_size)
+        return random.sample(self.memory, k=self.batch_size)
+    
         if (
             len(self.good_memory) >= self.partial_batch and
             len(self.bad_memory) >= self.partial_batch  and

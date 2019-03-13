@@ -8,24 +8,24 @@ from Support.replaybuffer import ReplayBuffer
 
 # Constants from paper: Lillicrap, Timothy P., et al., 2015. Continuous Control with Deep Reinforcement Learning.
 GAMMA = 0.99            # discount factor
-TAU = 0.01              # for soft update of target parameters
+TAU = 0.1              # for soft update of target parameters
 LR_ACTOR = 1e-4         # learning rate of the actor 
 LR_CRITIC = 1e-3        # learning rate of the critic
 
 # Replay buffer parameters
-BUFFER_SIZE = int(1e4)  # replay buffer size
-BATCH_SIZE = 64         # minibatch size
+BUFFER_SIZE = int(1e6)  # replay buffer size
+BATCH_SIZE = 128         # minibatch size
 
 
 # Noise parameters
 EXPLORATION_MU_MAIN_ENGINE = 0.0
 EXPLORATION_MU_DIRECTIONAL_ENGINE = 0.0
-EXPLORATION_THETA = 0.1 # same direction
-EXPLORATION_SIGMA = 0.1 # random noise
+EXPLORATION_THETA = 0.3 # same direction
+EXPLORATION_SIGMA = 0.3 # random noise
 
 
 EPSILON = 1.0
-EPSILON_MIN = 0.001
+EPSILON_MIN = 0.01
 EPSILON_DECAY = 1e-6
 
 class DDPG():
@@ -96,20 +96,19 @@ class DDPG():
         #self.memory.add(self.last_state, action, reward, next_state, done)
         
         
-        self.total_reward += reward
-        self.count += 1
+        #self.total_reward += reward
+        #self.count += 1
+        #self.score = reward#/ float(self.count) if self.count else 0.0
         
-        self.score = self.total_reward 
-        
-        if self.score > self.best_score:
-            self.best_score = self.score
+        #if self.score > self.best_score:
+        #    self.best_score = self.score
             
         # Save experience/reward
         self.memory.add(self.last_state, action, reward, next_state, done)
 
         # Learn if enough samples are available in memory.
         if len(self.memory) > self.batch_size:
-            #for _ in range(10):
+            #for _ in range(self.task.action_repeat):
             experiences = self.memory.sample()
             self.learn(experiences)
                 
@@ -126,12 +125,12 @@ class DDPG():
         # add some noise for exploration
         action = action + self.epsilon * self.noise.sample()
         
-        return action.astype(np.float32)  
+        return action 
     
     def learn(self, experiences):
         """Update policy and value parameters using given batch of experience tuples."""
         
-
+        
             
         # Convert experience tuples to separate arrays for each element (states, actions, rewards, etc.)
         states = np.vstack([e.state for e in experiences if e is not None]).astype(np.float32).reshape(-1, self.state_size)
@@ -148,7 +147,7 @@ class DDPG():
 
         # Compute Q targets for current states and train critic model (local)
         Q_targets = rewards + self.gamma * Q_targets_next * (1 - dones)
-
+        
         self.critic_local.model.train_on_batch(x=[states, actions], y=Q_targets)
 
         # Train actor model (local)
