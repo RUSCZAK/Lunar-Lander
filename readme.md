@@ -9,8 +9,8 @@ This capstone project implements a Deep Deterministic Policy Gradients algorithm
 ### STATE VARIABLES
 The state consists of the following variables:
 ```
-- x  position
-- y  position
+- x position
+- y position
 - x velocity
 - y velocity
 - angle
@@ -25,20 +25,25 @@ Lunar Lander continuous action space:
 Minimum  = -1.0
 Maximum  = +1.0
 
-ON Conditions:
-Lunar Lander Directional Engine - Left Thruster = [-1, 0.5] 
-Lunar Lander Directional Engine - Right Thruster = [0.5, 1]
-Lunar Lander Main Engine - Vertical = [0, 0.5]
+Actions = (main, directional)
 
-All engines are OFF for other conditions.
+ON Conditions:
+- Lunar Lander Directional Engine - Left Thruster = [-1, 0.5] 
+- Lunar Lander Directional Engine - Right Thruster = [0.5, 1]
+- Lunar Lander Main Engine - Vertical = [0, 0.5]
+
+Engines are OFF otherwise.
 
 ```
 ### Prerequisites
 
 List of libraries needed to run the project: 
 
+First install gym
+
 ```
 pip install gym
+```
 
 This project depends on OpenAI gym and Box2d.
 A full installation of gym is recommended.
