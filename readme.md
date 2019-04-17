@@ -6,7 +6,7 @@
 
 This capstone project implements a Deep Deterministic Policy Gradients algorithm to land a lunar lander in a simulated OpenAI Environment (Gym).
 
-###STATE VARIABLES
+### STATE VARIABLES
 The state consists of the following variables:
 ```
 - x  position
@@ -19,7 +19,7 @@ The state consists of the following variables:
 - second leg ground contact indicator
 ```
 
-###ACTION VARIABLES
+### ACTION VARIABLES
 Lunar Lander continuous action space:
 ```
 Minimum  = -1.0
