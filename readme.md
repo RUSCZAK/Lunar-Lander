@@ -48,7 +48,7 @@ pip install gym
 This project depends on OpenAI gym and Box2d.
 A full installation of gym is recommended.
 For this development, the following versions where used:
-
+```
 Name                    Version                
 gym                       0.11.0                   
 keras                     2.2.2             
