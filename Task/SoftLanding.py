@@ -15,7 +15,7 @@ class SoftLanding():
         """
         # Simulation
         self.env = gym.make('LunarLanderContinuous-v2')
-        #self.env = self.env.unwrapped
+        self.env = self.env.unwrapped
         self.env.seed(0)
         
         self.action_repeat = 3
