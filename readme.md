@@ -2,6 +2,37 @@
 ### Specializations
 ### Project: Capstone Proposal and Capstone Project
 
+### Problem Definition
+
+This capstone project implements a Deep Deterministic Policy Gradients algorithm to land a lunar lander in a simulated OpenAI Environment (Gym).
+
+###STATE VARIABLES
+The state consists of the following variables:
+```
+- x  position
+- y  position
+- x velocity
+- y velocity
+- angle
+- angular velocity
+- first leg ground contact indicator
+- second leg ground contact indicator
+```
+
+###ACTION VARIABLES
+Lunar Lander continuous action space:
+```
+Minimum  = -1.0
+Maximum  = +1.0
+
+ON Conditions:
+Lunar Lander Directional Engine - Left Thruster = [-1, 0.5] 
+Lunar Lander Directional Engine - Right Thruster = [0.5, 1]
+Lunar Lander Main Engine - Vertical = [0, 0.5]
+
+All engines are OFF for other conditions.
+
+```
 ### Prerequisites
 
 List of libraries needed to run the project: 
@@ -27,43 +58,11 @@ tensorflow                1.12.0
 
 ```
 
-### Problem Definition
-
-
-
-
-STATE VARIABLES
-The state consists of the following variables:
-
-x  position
-y  position
-x velocity
-y velocity
-angle
-angular velocity
-first leg ground contact indicator
-second leg ground contact indicator
-
-ACTION VARIABLES
-Lunar Lander continuous action space:
-```
-Minimum  = -1.0
-Maximum  = +1.0
-
-ON Conditions:
-Lunar Lander Directional Engine - Left Thruster = [-1, 0.5] 
-Lunar Lander Directional Engine - Right Thruster = [0.5, 1]
-Lunar Lander Main Engine - Vertical = [0, 0.5]
-
-All engines are OFF for other conditions.
-
-```
-
 ### Authors
 
 * **Jean Ricardo Rusczak**
 
-References: https://gym.openai.com/envs/LunarLander-v2/
+References: https://gym.openai.com/envs/LunarLanderContinuous-v2/
 
 ### License
 
