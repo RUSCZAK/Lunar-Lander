@@ -55,8 +55,8 @@ class Actor:
         states = layers.Input(shape=(self.state_size,), name='states')
 
         # Add hidden layers
-        #net = layers.BatchNormalization()(states)
-        net = states
+        net = layers.BatchNormalization()(states)
+        #net = states
         
         net = layers.Dense(units=HIDDEN1_UNITS,
                            #activation='relu',
