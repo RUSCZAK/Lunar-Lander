@@ -18,7 +18,7 @@ LR_ACTOR  = 1e-4          # learning rate of the actor
 LR_CRITIC = 1e-3         # learning rate of the critic
 
 # Replay buffer parameters
-BUFFER_SIZE = int(1.5e4)  # replay buffer size
+BUFFER_SIZE = int(1e4)  # replay buffer size
 BATCH_SIZE  = 128         # minibatch size
 
 
@@ -27,8 +27,8 @@ EXPLORATION_MU_MAIN_ENGINE = 0.0
 EXPLORATION_MU_DIRECTIONAL_ENGINE = 0.0
 #EXPLORATION_THETA = 0.2 # same direction
 #EXPLORATION_SIGMA = 0.15 # random noise
-EXPLORATION_THETA = 0.2 # same direction
-EXPLORATION_SIGMA = 0.15 # random noise
+EXPLORATION_THETA = 0.4 # same direction
+EXPLORATION_SIGMA = 0.3 # random noise
 
 EPSILON       = 1.0
 EPSILON_MIN   = 0.01

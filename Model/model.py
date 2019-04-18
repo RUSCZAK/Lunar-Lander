@@ -9,7 +9,7 @@ CRITIC_DROPOUT = 0.2
 DECAY = 0.00
 
 
-HIDDEN1_UNITS = 400
+HIDDEN1_UNITS = 600
 HIDDEN2_UNITS = 400
 
 PARAMETER_NOISE = 1e-4
@@ -55,8 +55,8 @@ class Actor:
         states = layers.Input(shape=(self.state_size,), name='states')
 
         # Add hidden layers
-        net = layers.BatchNormalization()(states)
-        #net = states
+        #net = layers.BatchNormalization()(states)
+        net = states
         
         net = layers.Dense(units=HIDDEN1_UNITS,
                            #activation='relu',
@@ -105,7 +105,7 @@ class Actor:
        # main_engine = layers.ThresholdedReLU(theta = 0.5)(main_engine)
         
         # Directional Engine Layers
-        directional_engine = layers.Dense(units=multiplier*32,
+        directional_engine = layers.Dense(units=multiplier*8,
                                           activation=None,
                                           use_bias = True,
                                           #kernel_regularizer=regularizers.l2(kernel_l2_reg),
